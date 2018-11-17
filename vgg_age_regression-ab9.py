@@ -7,9 +7,10 @@
 import pandas as pd
 import numpy as np
 from data_generator.batch_generator import BatchGenerator
-from keras.optimizers import Adam
+from keras.optimizers import Adam, SGD
 from keras.callbacks import ModelCheckpoint, CSVLogger, EarlyStopping, ReduceLROnPlateau
 from models import AlexNet, LeNet
+from keras.layers.advanced_activations import LeakyReLU, ELU
 from keras.applications.vgg16 import VGG16
 from keras import backend as K
 K.set_image_data_format('channels_last')
@@ -28,6 +29,9 @@ import tensorflow as tf
 
 # ?Abordagem 8: sem data augmentation
 
+# ?Abordagem 9: com data augmentation, com leaky relu, sgd, equalização
+
+
 # In[2]:
 
 with K.tf.device('/device:GPU:0'):
@@ -43,8 +47,8 @@ with K.tf.device('/device:GPU:0'):
 # In[3]:
 
 
-approach = 'abordagem8' 
-activation = 'relu'
+approach = 'abordagem9' 
+activation = 'lrelu'
 net = 'vgg16'
 
 if net == 'alexnet':
@@ -94,11 +98,11 @@ img_height, img_width, img_depth = (224,224,3)
 
 epochs = 1000
 
-train_batch_size = 32
+train_batch_size = 64
 shuffle = True
 ssd_train = False
 
-validation_batch_size = 32
+validation_batch_size = 64
 
 patience=30
 
@@ -108,10 +112,10 @@ patience=30
 train_generator = train_dataset.generate(batch_size=train_batch_size,
                                          shuffle=shuffle,
                                          ssd_train=ssd_train,
-#                                          random_rotation=20,
-#                                          translate=(0.2, 0.2),
-#                                          scale=(0.8, 1.2),
-#                                          flip=0.5,
+                                         random_rotation=20,
+                                         translate=(0.2, 0.2),
+                                         scale=(0.8, 1.2),
+                                         flip=0.5,
                                          divide_by_stddev=255,
                                          equalize=True,
                                          returns={'processed_labels'},
@@ -157,7 +161,8 @@ base_model.layers.pop()
 
 last = base_model.layers[-1].output
 
-preds = Dense(1, activation='relu')(last)
+preds = Dense(1)(last)
+preds = LeakyReLU()(preds)
 
 model = Model(base_model.input, preds)
 
