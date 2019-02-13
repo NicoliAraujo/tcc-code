@@ -713,6 +713,7 @@ class BatchGenerator:
                  convert_to_3_channels=True,
                  equalize=False,
                  brightness=False,
+                 channels_first=None,
                  flip=False,
                  translate=False,
                  random_rotation=False,
@@ -1372,14 +1373,21 @@ class BatchGenerator:
                 else:
                     batch_y_true = ssd_box_encoder.encode_y(batch_y,
                                                             diagnostics=False)  # Encode the labels into the `y_true` tensor that the SSD loss function needs.
+                    
+
             try:
                 batch_y = np.array(batch_y).reshape(len(batch_y), len(self.box_output_format))
             except ValueError:
                 yield batch_y
             try:
-                batch_X = np.array(batch_X).reshape(len(batch_X), resize[0], resize[1], 3)
+                if not channels_first:
+                    batch_X = np.array(batch_X).reshape(len(batch_X), resize[0], resize[1], 3)
+                else:
+                    batch_X = np.array(batch_X).reshape(len(batch_X), 3, resize[0], resize[1])
             except ValueError:
                 yield batch_X
+            
+                        
             # Compile the output.
             ret = []
             ret.append(batch_X)
