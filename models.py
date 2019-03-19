@@ -109,35 +109,32 @@ class SqueezeNet(CNN):
         
         #params nb_classes, inputs=(3, 224, 224)
         
-        input_img = Input(shape=input_shape)
-        conv1 = Convolution2D(
-            96, (7, 7), activation='relu', kernel_initializer='glorot_uniform',
-            strides=(2, 2), padding='same', name='conv1')(input_img)
-        maxpool1 = MaxPooling2D(
-            pool_size=(3, 3), strides=(2, 2), name='maxpool1')(conv1)
-        fire2_squeeze = Convolution2D(
-            16, (1, 1), activation='relu', kernel_initializer='glorot_uniform',
-            padding='same', name='fire2_squeeze')(maxpool1)
-        fire2_expand1 = Convolution2D(
-            64, (1, 1), activation='relu', kernel_initializer='glorot_uniform',
-            padding='same', name='fire2_expand1')(fire2_squeeze)
-        fire2_expand2 = Convolution2D(
+        self.add(Conv2D(96, (7, 7), kernel_initializer='glorot_uniform', strides=(2, 2), padding='same', name='conv1', input_shape=input_shape))
+        self.add_activation()
+        self.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), name='maxpool1'))
+        self.add(Conv2D(16, (1, 1), kernel_initializer='glorot_uniform',
+            padding='same', name='fire2_squeeze'))
+        self.add_activation()
+        self.add(Conv2D(64, (1, 1), kernel_initializer='glorot_uniform',
+            padding='same', name='fire2_expand1'))
+        self.add_activation()
+        self.add(Convolution2D(
             64, (3, 3), activation='relu', kernel_initializer='glorot_uniform',
             padding='same', name='fire2_expand2')(fire2_squeeze)
-        merge2 = Concatenate(axis=1)([fire2_expand1, fire2_expand2])
+        self.add(Concatenate(axis=1)([fire2_expand1, fire2_expand2])
 
-        fire3_squeeze = Convolution2D(
+        self.add(Convolution2D(
             16, (1, 1), activation='relu', kernel_initializer='glorot_uniform',
             padding='same', name='fire3_squeeze')(merge2)
-        fire3_expand1 = Convolution2D(
+        self.add(Convolution2D(
             64, (1, 1), activation='relu', kernel_initializer='glorot_uniform',
             padding='same', name='fire3_expand1')(fire3_squeeze)
-        fire3_expand2 = Convolution2D(
+        self.add(Convolution2D(
             64, (3, 3), activation='relu', kernel_initializer='glorot_uniform',
             padding='same', name='fire3_expand2')(fire3_squeeze)
-        merge3 = Concatenate(axis=1)([fire3_expand1, fire3_expand2])
+        self.add(Concatenate(axis=1)([fire3_expand1, fire3_expand2])
 
-        fire4_squeeze = Convolution2D(
+        self.add(Convolution2D(
             32, (1, 1), activation='relu', kernel_initializer='glorot_uniform',
             padding='same', name='fire4_squeeze')(merge3)
         fire4_expand1 = Convolution2D(
