@@ -3,8 +3,7 @@ from keras.models import Model
 from keras.layers import Input, Activation, Concatenate
 from keras.layers import Flatten, Dropout
 from keras.layers import Convolution2D, MaxPooling2D
-from keras.layers import GlobalAveragePooling2D
-
+from keras.layers import GlobalAveragePooling2D, LeakyReLU
 
 def SqueezeNet(nb_classes, inputs=(3, 224, 224)):
     """ Keras Implementation of SqueezeNet(arXiv 1602.07360)
@@ -149,6 +148,7 @@ def SqueezeNet(nb_classes, inputs=(3, 224, 224)):
         data_format="channels_first")(fire9_dropout)
 
     global_avgpool10 = GlobalAveragePooling2D(data_format='channels_first')(conv10)
-    softmax = Activation("softmax", name='softmax')(global_avgpool10)
+    #softmax = Activation("softmax", name='softmax')(global_avgpool10)
+    output = Activation("relu", name='relu')(global_avgpool10)
 
-    return Model(inputs=input_img, outputs=softmax)
+    return Model(inputs=input_img, outputs=output)
